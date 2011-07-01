@@ -3,3 +3,8 @@
 *#
 
 fluidcv/settings.py
+flask
+flaskext
+jinja2
+werkzeug
+wtforms
