@@ -1,0 +1,126 @@
+{% extends 'layout.html' %}
+{% block body %}
+  <h1 id="welcome_to_fluidcv">Welcome to FluidCV</h1>
+  <p>
+    <em>FluidCV</em> is a new type of resumé. It is open and social, just
+    like <a href="http://fluidinfo.com">Fluidinfo</a>, which is of course
+    the back-end for FluidCV. FluidCV dynamically builds your resumé from
+    the your tags on Fluidinfo objects. Look at <a href="/gridaphobe">my
+    resumé</a> for a quick example.
+  </p>
+  <p>
+    FluidCV is still very much a work-in-progress (I haven't even finished
+    my own resumé yet), but the basic steps to making your own FluidCV are
+    pretty simple.
+  </p>
+  <ol>
+    <li>
+      <a href="https://fluidinfo.com/accounts/new/">Sign up</a> for a
+      Fluidinfo account.
+    </li>
+    <li>
+      Download a library for interacting with Fluidinfo. 
+      <strong>Note</strong>: This will change as soon as I have time to
+      implement a web-interface.
+      If you're not comfortable with the command-line (or aren't sure
+      what that is :p), I'd recommend using the
+      <a href="http://explorer.fluidinfo.com">Fluidinfo Explorer</a>
+      for a nice, graphical interface with Fluidinfo.
+    </li>
+    <li>
+      Start tagging your work and education history!!
+    </li>
+    <li>
+      ???
+    </li>
+    <li>
+      Visit http://fluid-cv.appspot.com/YOUR_FLUIDINFO_USERNAME
+    </li>
+    <li>
+      Profit!
+    </li>
+  </ol>
+  <h2 id="tags_to_use">Tags to use</h2>
+  <p>
+    FluidCV relies on your using the proper tags to describe your 
+    professional experience, contact info, etc. Make sure you use the
+    following tags (I'm pretty sure that for now, it will error if any 
+    objects are missing tags, but that will change too).
+  </p>
+  <h3 id="Person">Contact Info</h3>
+  <p>
+    These tags should be placed on your user object. This is the object with
+    <pre><code>fluiddb/users/username="YOUR_USERNAME"</code></pre>
+  </p>
+  <dl>
+    {% for tag, doc in person_doc|dictsort %}
+    <dt>{{ tag }}</dt>
+    <dd>{{ doc }}</dd>
+    {% endfor %}
+  </dl>
+  <h3 id="Work">Employment History</h3>
+  <p>
+    These tags should be placed on objects representing the companies you've
+    worked for. For example, I worked for Apple so I tagged the object with
+    <pre><code>fluiddb/about="http://www.apple.com"</code></pre>
+    You must also tag these objects with
+    <pre><code>YOUR_USERNAME/employer</code></pre>
+    so FluidCV knows which objects to inspect.
+  </p>
+  <dl>
+    {% for tag, doc in work_doc|dictsort %}
+    <dt>{{ tag }}</dt>
+    <dd>{{ doc }}</dd>
+    {% endfor %}
+  </dl>
+  <h3 id="School">Education History</h3>
+  <p>
+    These tags should be placed on objects representing the schools you've
+    attended. For example, I attended the City College of New York
+    so I tagged the object with
+    <pre><code>fluiddb/about="http://ccny.cuny.edu"</code></pre>
+    You must also tag these objects with
+    <pre><code>YOUR_USERNAME/attended</code></pre>
+    so FluidCV knows which objects to inspect.
+  </p>
+  <dl>
+    {% for tag, doc in school_doc|dictsort %}
+    <dt>{{ tag }}</dt>
+    <dd>{{ doc }}</dd>
+    {% endfor %}
+  </dl>
+  <h3 id="Skills">Skills</h3>
+  <p>
+    Skills on FluidCV will be represented by covers of books that
+    pertain to the skill in question. Right now, they are limited to
+    O'Reilly books since only O'Reilly provides covers in Fluidinfo,
+    but I'm sure that will eventually change. All you have to do to
+    start adding skills to your FluidCV is add the tag
+    <pre><code>YOUR_USERNAME/skill</code></pre>
+    to an object that has the O'Reilly tags. FluidCV will figure out
+    the rest :). To make it easier, you can just go to your edit
+    page and use the nice, new autocomplete skill form!
+  </p>
+
+<script type="text/javascript">
+  var uservoiceOptions = {
+    key: 'fluidcv',
+    host: 'fluidcv.uservoice.com', 
+    forum: '105765',
+    alignment: 'right',
+    background_color:'#FF0000', 
+    text_color: 'white',
+    hover_color: '#0066CC',
+    lang: 'en',
+    showTab: true
+  };
+  function _loadUserVoice() {
+    var s = document.createElement('script');
+    s.src = ("https:" == document.location.protocol ? "https://" : "http://") + "cdn.uservoice.com/javascripts/widgets/tab.js";
+    document.getElementsByTagName('head')[0].appendChild(s);
+  }
+  _loadSuper = window.onload;
+  window.onload = (typeof window.onload != 'function') ? _loadUserVoice : function() { _loadSuper(); _loadUserVoice(); };
+</script>
+  
+{% endblock %}

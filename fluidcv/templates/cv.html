@@ -1,0 +1,166 @@
+<!DOCTYPE HTML>
+<html>
+<head profile="http://microformats.org/profile/hresume">
+  <title>{{ person.given_name }} {{ person.family_name }}</title>
+  <!-- <link rel="stylesheet" href="/static/blueprint/screen.css" type="text/css" /> -->
+  <link rel="stylesheet" href="/static/css/style.css" type="text/css" />
+</head>
+<body>
+  <div class="hresume" id="page-wrap">
+    {% if person.has_pic %}
+    <img src="{{ person.picture }}" alt="Photo of {{ person.given_name }}
+              {{ person.family_name }}" id="pic" />
+    {% endif %}
+    
+    <div class="contact vcard" id="contact-info">
+      <h1>
+        <span class="fn n">
+          <span class="given-name">{{ person.given_name }}</span>
+          <span class="family-name">{{ person.family_name }}</span>
+        </span>
+        &mdash;
+        <span class="role">{{ person.role }}</span>
+      </h1>
+      <div class="adr">
+        <div class="street-address">{{ person.street_address }}</div>
+        <span class="locality">{{ person.locality }}</span>,
+        <abbr class="region" title="{{ person.region|expandstate }}">
+          {{ person.region }}
+        </abbr>
+        <span class="postal-code">{{ person.postal_code }}</span>
+      </div>
+      <p>
+        Cell: <span class="tel">{{ person.cell_phone }}</span><br />
+        Email: <a class="email" href="mailto:{{ person.email }}">{{ person.email }}</a>
+      </p>
+    </div>
+    
+    {% if person.summary %}
+      <section id="objective" class="summary">
+        <p>
+          {{ person.summary|urllinker|safe }}
+        </p>
+      </section>
+    {% endif %}
+    <div class="clear"></div>
+    <dl>
+      {% if oskills %}
+        <dd class="clear"></dd>
+        <dt>Skills</dt>
+        <div id="skill-list">
+          <ul>
+            {% for oskill in oskills|sort(attribute='title') %}
+              <li>
+                <a class="skill" rel="tag" href="{{ oskill.homepage }}" 
+                   title="{{ oskill.title }}">
+                  <img src="{{ oskill.cover_small }}" />
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      {% if schools %}
+        <dd class="clear"></dd>
+        <dt>Education</dt>
+        <div class="vcalendar">
+          {% for school in schools|sort(reverse=True, attribute='end_date') %}
+            <dd class="education vevent vcard">
+              <h2>
+                <span class="summary org">{{ school.school_name }}</span>
+                <span class="right">
+                  <span class="date">
+                      <abbr class="dtstart" title="{{ school.start_date }}">
+                          {{ school.start_date|parsedatetimeformat }}
+                      </abbr>
+                      -
+                      {% if school.end_date|lower in ['current', 'present'] %}
+                      <abbr class="dtstamp"
+                        title="{{ current_date }}">
+                        {{ school.end_date }}
+                      </abbr>
+                    {% else %}
+                      <abbr class="dtend" title="{{ school.end_date }}">
+                        {{ school.end_date|parsedatetimeformat }}
+                      </abbr>
+                    {% endif %}
+                  </span>
+                </span>
+              </h2>
+              <a href="#contact-info" class="include" 
+                title="{{ person.given_name }} {{ person.family_name }}"></a>
+              <h3 class="location italic">{{ school.school_location }}</h3>
+              <ul class="description">
+                  <li>{{ school.degree }} {{ school.major }}</li>
+                  {% if school.gpa %}
+                    <li>GPA: {{ school.gpa }}</li>
+                  {% endif %}
+              </ul>
+            </dd>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if jobs %}
+        <dd class="clear"></dd>
+        <dt>Experience</dt>
+        <div class="vcalendar">
+          {% for job in jobs|sort(reverse=True, attribute='end_date') %}
+            <dd class="experience vevent vcard">
+              <h2>
+                <span class="summary">{{ job.title }}</span>
+                <span class="right">
+                  <span class="date">
+                    <abbr class="dtstart" title="{{ job.start_date }}">
+                          {{ job.start_date|parsedatetimeformat }}
+                    </abbr>
+                    -
+                    {% if job.end_date|lower in ['current', 'present'] %}
+                      <abbr class="dtstamp" 
+                        title="{{ current_date }}">
+                        {{ job.end_date }}
+                      </abbr>
+                    {% else %}
+                      <abbr class="dtend" title="{{ job.end_date }}">
+                        {{ job.end_date|parsedatetimeformat }}
+                      </abbr>
+                    {% endif %}
+                  </span>
+                </span>
+              </h2>
+              <a href="#contact-info" class="include" 
+                title="{{ person.given_name }} {{ person.family_name }}"></a>
+              <h3 class="location org italic">{{ job.company }}</h3>
+              <ul class="description">
+                {% for func in job.functions %}
+                  <li>{{ func|urllinker|safe }}</li>
+                {% endfor %}
+              </ul>
+            </dd>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if publications %}
+      <dd class="clear"></dd>
+      <dt>Publications</dt>
+      <div class="publications documents">
+        {% for pub in publications|sort(reverse=True, attribute='year') %}
+          <dd class="publication vevent vcard">
+            <h2>
+              <cite>{{ pub.title }}</cite>
+            </h2>
+            <h3 class="specifics italic">
+              <span class="fn org">{{ pub.journal }}</span>
+              <span class="dtstart">{{ pub.year }}</span>
+            </h3>
+            <a href="#contact-info" class="include" 
+              title="{{ person.given_name }} {{ person.family_name }}"></a>
+          </dd>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <dd class="clear"></dd>
+    </dl>
+    <div class="clear"></div>
+  </div>
+</body>
+</html>

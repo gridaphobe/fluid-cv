@@ -1,0 +1,38 @@
+{% from "_formhelpers.html" import render_field %}
+<script type="text/javascript" charset="utf-8">
+var job_counter = 0;
+$(document).ready(function()
+{
+  {% for i in range(jobs|length) %}
+  job_counter++;
+  $("#jobs-{{i}}-company").attr("value", "{{ jobs[i].company }}");
+  $("#jobs-{{i}}-url").attr("value", "{{ jobs[i].about }}");
+  $("#jobs-{{i}}-title").attr("value", "{{ jobs[i].title }}");
+  $("#jobs-{{i}}-start_date").attr("value", "{{ jobs[i].start_date }}");
+  $("#jobs-{{i}}-end_date").attr("value", "{{ jobs[i].end_date }}");
+  $("#jobs-{{i}}-functions").attr("value", "{{ jobs[i].functions|safe }}");
+  {% endfor %}
+  
+  $('input[name$="date"]').datepicker({ dateFormat: 'yy-mm-dd' });
+  
+  $("#add-job").click( function() {
+    $("#job-insert-point").before('<dl id="jobs-'+job_counter+'"><dt><label for="jobs-'+job_counter+'-company">Company Name</label><dd><input id="jobs-'+job_counter+'-company" name="jobs-'+job_counter+'-company" type="text" value="" /></dd><dt><label for="jobs-'+job_counter+'-url">Company URL</label><dd><input id="jobs-'+job_counter+'-url" name="jobs-'+job_counter+'-url" type="text" value="" /></dd><dt><label for="jobs-'+job_counter+'-title">Job Title</label><dd><input id="jobs-'+job_counter+'-title" name="jobs-'+job_counter+'-title" type="text" value="" /></dd><dt><label for="jobs-'+job_counter+'-start_date">Start Date</label> <dd><input id="jobs-'+job_counter+'-start_date" name="jobs-'+job_counter+'-start_date" type="text" value="" /></dd><dt><label for="jobs-'+job_counter+'-end_date">End Date (current/present accepted)</label><dd><input id="jobs-'+job_counter+'-end_date" name="jobs-'+job_counter+'-end_date" type="text" value="" /></dd><dt><label for="jobs-'+job_counter+'-functions">Job Functions (1 per line)</label><dd><textarea id="jobs-'+job_counter+'-functions" name="jobs-'+job_counter+'-functions"></textarea></dd></dl>');
+    job_counter++;
+    $('input[name$="date"]').datepicker({ dateFormat: 'yy-mm-dd' });
+    //return false;
+  });
+});
+
+</script>
+{% for i in range(jobs|length) %}
+  <dl id="jobs-{{i}}">
+    {{ render_field(form.jobs[i].company) }}
+    {{ render_field(form.jobs[i].url) }}
+    {{ render_field(form.jobs[i].title) }}
+    {{ render_field(form.jobs[i].start_date) }}
+    {{ render_field(form.jobs[i].end_date) }}
+    {{ render_field(form.jobs[i].functions) }}
+  </dl>
+{% endfor %}
+<div id="job-insert-point"></div>
+<input type="button" value="Add a Job" id="add-job" />

@@ -1,0 +1,42 @@
+{% from "_formhelpers.html" import render_field %}
+<script type="text/javascript" charset="utf-8">
+var school_counter = 0;
+$(document).ready(function()
+{
+  {% for i in range(schools|length) %}
+  school_counter++;
+  $("#schools-{{i}}-school_name").attr("value", "{{ schools[i].school_name }}");
+  $("#schools-{{i}}-url").attr("value", "{{ schools[i].about }}");
+  $("#schools-{{i}}-school_location").attr("value", "{{ schools[i].school_location }}");
+  $("#schools-{{i}}-start_date").attr("value", "{{ schools[i].start_date }}");
+  $("#schools-{{i}}-end_date").attr("value", "{{ schools[i].end_date }}");
+  $("#schools-{{i}}-major").attr("value", "{{ schools[i].major }}");
+  $("#schools-{{i}}-gpa").attr("value", "{{ schools[i].gpa }}");
+  $("#schools-{{i}}-degree").attr("value", "{{ schools[i].degree }}");
+  {% endfor %}
+  
+  $('input[name$="date"]').datepicker({ dateFormat: 'yy-mm-dd' });
+  
+  $("#add-school").click( function() {
+    $("#school-insert-point").before('<dl id="schools-'+school_counter+'"><dt><label for="schools-'+school_counter+'-school_name">School Name</label><dd><input id="schools-'+school_counter+'-school_name" name="schools-'+school_counter+'-school_name" type="text" value="" /></dd><dt><label for="schools-'+school_counter+'-url">School URL</label><dd><input id="schools-'+school_counter+'-url" name="schools-'+school_counter+'-url" type="text" value="" /></dd><dt><label for="schools-'+school_counter+'-school_location">School Location</label><dd><input id="schools-'+school_counter+'-school_location" name="schools-'+school_counter+'-school_location" type="text" value="" /></dd><dt><label for="schools-'+school_counter+'-start_date">Start Date</label><dd><input id="schools-'+school_counter+'-start_date" name="schools-'+school_counter+'-start_date" type="text" value="" /></dd><dt><label for="schools-'+school_counter+'-end_date">End Date (current/present accepted)</label><dd><input id="schools-'+school_counter+'-end_date" name="schools-'+school_counter+'-end_date" type="text" value="" /></dd><dt><label for="schools-'+school_counter+'-degree">Degree</label><dd><input id="schools-'+school_counter+'-degree" name="schools-'+school_counter+'-degree" type="text" value="" /></dd><dt><label for="schools-'+school_counter+'-major">Major</label><dd><input id="schools-'+school_counter+'-major" name="schools-'+school_counter+'-major" type="text" value="" /></dd><dt><label for="schools-'+school_counter+'-gpa">GPA</label><dd><input id="schools-'+school_counter+'-gpa" name="schools-'+school_counter+'-gpa" type="text" value="" /></dd></dl>');
+    school_counter++;
+    $('input[name$="date"]').datepicker({ dateFormat: 'yy-mm-dd' });
+    //return false;
+  });
+});
+
+</script>
+{% for i in range(schools|length) %}
+  <dl id="schools-{{i}}">
+    {{ render_field(form.schools[i].school_name) }}
+    {{ render_field(form.schools[i].url) }}
+    {{ render_field(form.schools[i].school_location) }}
+    {{ render_field(form.schools[i].start_date) }}
+    {{ render_field(form.schools[i].end_date) }}
+    {{ render_field(form.schools[i].degree) }}
+    {{ render_field(form.schools[i].major) }}
+    {{ render_field(form.schools[i].gpa) }}
+  </dl>
+{% endfor %}
+<div id="school-insert-point"></div>
+<input type="button" value="Add a school" id="add-school" />

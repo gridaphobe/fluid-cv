@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>{% block title %}FluidCV{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/blueprint/screen.css"
+        type="text/css" media="screen" charset="utf-8">
+  <link rel="stylesheet" type="text/css"
+        href="/static/css/cupertino/jquery-ui-1.8.10.custom.css">
+  <link rel="stylesheet" href="/static/css/token-input.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/static/js/jquery-1.5.1.min.js"></script>
+  <script type="text/javascript"
+          src="/static/js/jquery-ui-1.8.10.custom.min.js"></script>
+  <script type="text/javascript"
+          src="/static/js/jquery.tokeninput.js"></script>
+  <script type="text/javascript" src="/static/js/fluiddb.js"></script>
+</head>
+<body>
+  <section class="container">
+    {% block body %}{% endblock %}
+  </section>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% from "_formhelpers.html" import render_field %}
+<script type="text/javascript" charset="utf-8">
+  $(document).ready(function() {
+    var skill_list = [];
+    url = "http://fluiddb.fluidinfo.com/values"
+    $.getJSON(
+      url, 
+      {
+        query:"has oreilly.com/title",
+        tag:"oreilly.com/title"
+      }, 
+      function(data) {
+        $.each(data.results.id, function(key, val) {
+          uid = Object.keys($(this))[0];
+          skill_list.push({'id': key, 'name': val['oreilly.com/title']['value']});
+        });
+      });
+    $("#skills-skills").tokenInput(skill_list, {
+      prePopulate: {{ skill_list|safe }}
+    });
+  });
+</script>
+<dl>
+  {{ render_field(form.skills.skills) }}
+</dl>

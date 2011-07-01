@@ -1,0 +1,27 @@
+{% from "_formhelpers.html" import render_field %}
+<script type="text/javascript" charset="utf-8">
+  $(document).ready(function() {
+    $("#person-given_name").attr("value", "{{ person.given_name }}");
+    $("#person-family_name").attr("value", "{{ person.family_name }}");
+    $("#person-email").attr("value", "{{ person.email }}");
+    $("#person-phone").attr("value", "{{ person.cell_phone }}");
+    $("#person-role").attr("value", "{{ person.role }}");
+    
+    $("#person-address-street_address").attr("value", "{{ person.street_address }}");
+    $("#person-address-city").attr("value", "{{ person.locality }}");
+    $("#person-address-state").attr("value", "{{ person.region }}");
+    $("#person-address-zip_code").attr("value", "{{ person.postal_code }}");
+    
+    $("#person-summary").attr("value", "{{ person.summary }}");
+    
+    });
+</script>
+<dl>
+  {{ render_field(form.person.given_name) }}
+  {{ render_field(form.person.family_name) }}
+  {{ render_field(form.person.role) }}
+  {{ render_field(form.person.phone) }}
+  {{ render_field(form.person.email) }}
+  {{ render_field(form.person.address) }}
+  {{ render_field(form.person.summary) }}
+</dl>

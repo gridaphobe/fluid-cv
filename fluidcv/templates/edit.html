@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+{% from "_formhelpers.html" import render_field %}
+{% block title %}Edit {{ user }}{% endblock %}
+{% block body %}
+  <header>
+    <h1>Edit your CV!</h1>
+  </header>
+  
+  {% for category, msg in get_flashed_messages(with_categories=true) %}
+    <p class="{{ category }}">{{ msg }}
+  {% endfor %}
+  
+  <section>
+    <script type="text/javascript" charset="utf-8">
+    $(function($) {
+      $("#tabs").tabs();
+    });
+    </script>
+    <form method="post" action="edit" id="resume">
+    {{ form.hidden_tag() }}
+    <div id="tabs">
+      <ul>
+        <li><a href="#tabs-1">Contact Info</a></li>
+        <li><a href="#tabs-2">Job History</a></li>
+        <li><a href="#tabs-3">Education History</a></li>
+        <li><a href="#tabs-4">Skills</a></li>
+      </ul>
+      <div id="tabs-1">
+        {% include '_edit_person.html' %}
+      </div>
+      <div id="tabs-2">
+        {% include '_edit_work.html' %}
+      </div>
+      <div id="tabs-3">
+        {% include '_edit_school.html' %}       
+      </div>
+      <div id="tabs-4">
+        {% include '_edit_skill.html' %}
+      </div>
+    </div>
+    <dl>
+      {{ render_field(form.person.password) }}
+    </dl>
+    <p><input type="submit" value="Update" /></p>
+    </form>
+  </section>
+{% endblock %}
