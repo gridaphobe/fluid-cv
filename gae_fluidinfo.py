@@ -2,6 +2,9 @@
 """
 A very thin wrapper on top of the Fluidinfo RESTful API
 
+Modified by Eric Seidel to take advantage of the Google
+App Engine urlfetch library
+
 Copyright (c) 2009-2010 Seo Sanghyeon, Nicholas Tollervey and others
 
 See README, AUTHORS and LICENSE for more information

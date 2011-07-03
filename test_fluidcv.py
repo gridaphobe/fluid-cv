@@ -1,5 +1,5 @@
 import fluidcv
-from fluidcv import gae_fluidinfo as fluid
+import gae_fluidinfo as fluid
 import unittest
 from google.appengine.api import apiproxy_stub_map
 from google.appengine.api import urlfetch_stub
