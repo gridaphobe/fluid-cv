@@ -29,11 +29,11 @@ class FluidObject(object):
         #self.reload_tags()
 
     @classmethod
-    def async_filter(cls, query, user):
+    def filter(cls, query, user, async=False):
         query = query % user
         tags = ['%s/%s' % (user, tag) for tag in cls.TAGS.keys()]
         tags.append('fluiddb/about')
-        rpc = fluid.get('/values', query=query, tags=tags, async=True)
+        rpc = fluid.get('/values', query=query, tags=tags, async=async)
         return rpc
 
     def reload_tags(self):
@@ -132,7 +132,10 @@ class Person(FluidObject):
 
     def __init__(self, uid, user, tags):
         # remove picture tag
-        del(tags['%s/picture' % user])
+        try:
+            del(tags['%s/picture' % user])
+        except KeyError:
+            pass
         super(Person, self).__init__(uid, user, tags)
         for tag in Person.TAGS:
             if not hasattr(self, tag.replace('-','_')):

@@ -31,7 +31,11 @@ def index():
 
 @app.route('/<user>')
 def cv(user):
-    person_rpc = Person.async_filter('fluiddb/users/username="%s"', user)
+    # quick check to make sure the user actually exists
+    resp = fluid.get('/users/%s' % user)
+    if resp.status_code == 404:
+        abort(404)
+    person_rpc = Person.filter('fluiddb/users/username="%s"', user, async=True)
     # check for person's picture
     #logging.debug('Checking for %s/picture at %s' % (user, person.picture))
     #h = httplib2.Http()
@@ -44,46 +48,50 @@ def cv(user):
     #    logging.debug('%s/picture does not exist. Returned %s status' % (
     #        user, head['status']))
     # find user's jobs
-    work_rpc = Work.async_filter('has %s/employer', user)
+    work_rpc = Work.filter('has %s/employer', user, async=True)
     # find user's schools
-    school_rpc = Education.async_filter('has %s/attended', user)
+    school_rpc = Education.filter('has %s/attended', user, async=True)
     # find user's publications
     #publications = fluid_filter('has %s/publication' % user)
     #publications = [Publication(uid, user) for uid in publications]
     publications = []
     # find user's skills associated with o'reilly books
-    oskill_rpc = OReillySkill.async_filter(
-            'has %s/skill and has %%s/title' % user, 'oreilly.com')
+    oskill_rpc = OReillySkill.filter(
+            'has %s/skill and has %%s/title' % user, 'oreilly.com', async=True)
+
     resp = fluid.result(person_rpc)
-    if resp.status_code == 204:
-        print resp.status_code
-        uid, tags = resp.content['results']['id'].items()[0]
+    logging.info('Person filter for %s returned %d' % (user, resp.status_code))
+    if resp.status_code == 200:
+        [(uid, tags)] = resp.content['results']['id'].items()
         person = Person(uid, user, tags)
     else:
-        logging.info('Person filter for %s returned %d' % (user, resp.status_code))
         abort(404)
+
     resp = fluid.result(work_rpc)
-    if resp.status_code == 204:
+    logging.info('Work filter for %s returned %d' % (user, resp.status_code))
+    if resp.status_code == 200:
         jobs = resp.content['results']['id']
         jobs = [Work(uid, user, tags) for (uid, tags) in jobs.items()]
     else:
         #FIXME need better error handling
-        logging.info('Work filter for %s returned %d' % (user, resp.status_code))
-        abort(404)
+        jobs = []
+
     resp = fluid.result(school_rpc)
-    if resp.status_code == 204:
+    logging.info('School filter for %s returned %d' % (user, resp.status_code))
+    if resp.status_code == 200:
         schools = resp.content['results']['id']
-        schools = [Education(uid, user, tags) for (uid, tags) in schools.items()]
+        schools = [Education(uid, user, tags)
+                    for (uid, tags) in schools.items()]
     else:
-        logging.info('School filter for %s returned %d' % (user, resp.status_code))
-        abort(404)
+        schools = []
+
     resp = fluid.result(oskill_rpc)
-    if resp.status_code == 204:
+    logging.info('Skill filter for %s returned %d' % (user, resp.status_code))
+    if resp.status_code == 200:
         oskills = resp.content['results']['id']
         oskills = [OReillySkill(uid, tags) for (uid, tags) in oskills.items()]
     else:
-        logging.info('Skill filter for %s returned %d' % (user, resp.status_code))
-        abort(404)
+        oskills = []
 
     return render_template('cv.html', person=person, jobs=jobs,
                            schools=schools, publications=publications,
