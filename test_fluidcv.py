@@ -21,15 +21,20 @@ class FluidCVTestCase(unittest.TestCase):
     def setUpClass(cls):
         fluid.login(USERNAME, PASSWORD)
         # create necessary tags
+        rpcs = []
         for cls in [Person, Education, Work]:
             for tag in cls.TAGS:
-                resp = fluid.post('/tags/test', body={'name' : tag,
-                                                      'description' : None,
-                                                      'indexed' : True})
-                if resp.status_code not in [201, 412]:
-                    print 'Failed to create tag: %s' % tag
-                    print resp.headers
-                    sys.exit(1)
+                rpc = fluid.post('/tags/test', async=True,
+                                 body={'name' : tag,
+                                       'description' : None,
+                                       'indexed' : True})
+                rpcs.append(rpc)
+        for rpc in rpcs:
+            resp = fluid.result(rpc)
+            if resp.status_code not in [201, 412]:
+                print 'Failed to create tag: %s' % tag
+                print resp.headers
+                sys.exit(1)
         fluid.logout()
 
     @classmethod
@@ -43,39 +48,77 @@ class FluidCVTestCase(unittest.TestCase):
 
     def setUp(self):
         self.app = fluidcv.app.test_client()
+        fluid.login(USERNAME, PASSWORD)
 
     def tearDown(self):
-        pass
+        fluid.logout()
 
     def testNonExistentCVReturnsNotFound(self):
         rv = self.app.get('/%s' % uuid.uuid4())
         self.assertEqual(404, rv.status_code)
 
-    def testNameRequiredForCV(self):
-        fluid.login(USERNAME, PASSWORD)
-        resp = fluid.put('/values', body={'queries': [
-            ['fluiddb/users/username = "test"',
-                {
-                    'test/given-name' : {
-                        'value' : 'Sigmund'
-                        },
-                    'test/family-name' : {
-                        'value' : 'Freud'
-                        }
-                    }
-                ]
-            ]})
-
+    def testCVWithoutNameUsesSystemTags(self):
+        rv = self.app.get('/test')
+        self.assertEqual(200, rv.status_code)
+        self.assertIn('test', rv.data)
+        
+    def testNameInCV(self):
+        fluid.put('/values', body={'queries': [
+                    ['fluiddb/users/username = "test"',
+                     {'test/given-name' : {'value' : 'Sigmund'},
+                      'test/family-name' : {'value' : 'Freud'}}]]})
 
         rv = self.app.get('/test')
         self.assertEqual(200, rv.status_code)
         self.assertIn('Sigmund Freud', rv.data)
 
         # now cleanup
-        fluid.delete('/delete', query='fluiddb/users/username = "test"',
-                                tags=['test/given-name', 'test/family-name'])
-        fluid.logout()
+        fluid.delete('/values', query='fluiddb/users/username = "test"',
+                     tags=['test/given-name', 'test/family-name'])
 
+    def testRoleInCV(self):
+        fluid.put('/values', body={'queries': [
+                    ['fluiddb/users/username = "test"',
+                     {'test/role': {'value' : 'badass'}}]]})
+        rv = self.app.get('/test')
+        self.assertEqual(200, rv.status_code)
+        self.assertIn('badass', rv.data)
 
+        fluid.delete('/values', query='fluiddb/users/username = "test"',
+                     tags=['test/role'])
+
+    def testEmailInCV(self):
+        fluid.put('/values', body={'queries': [
+                    ['fluiddb/users/username = "test"',
+                     {'test/email': {'value' : 'test@example.com'}}]]})
+        rv = self.app.get('/test')
+        self.assertEqual(200, rv.status_code)
+        self.assertIn('test@example.com', rv.data)
+
+        fluid.delete('/values', query='fluiddb/users/username = "test"',
+                     tags=['test/email'])
+
+    def testCellPhoneInCV(self):
+        fluid.put('/values', body={'queries': [
+                    ['fluiddb/users/username = "test"',
+                     {'test/cell-phone': {'value' : '(123) 456-7890'}}]]})
+        rv = self.app.get('/test')
+        self.assertEqual(200, rv.status_code)
+        self.assertIn('(123) 456-7890', rv.data)
+
+        fluid.delete('/values', query='fluiddb/users/username = "test"',
+                     tags=['test/cell-phone'])
+
+    def testStreetAddressInCV(self):
+        fluid.put('/values', body={'queries': [
+                    ['fluiddb/users/username = "test"',
+                     {'test/street-address': {'value' : '123 Main St.'}}]]})
+        rv = self.app.get('/test')
+        self.assertEqual(200, rv.status_code)
+        self.assertIn('123 Main St.', rv.data)
+
+        fluid.delete('/values', query='fluiddb/users/username = "test"',
+                     tags=['test/street-address'])
+        
 if __name__ == '__main__':
     unittest.main()

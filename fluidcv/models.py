@@ -140,6 +140,16 @@ class Person(FluidObject):
         for tag in Person.TAGS:
             if not hasattr(self, tag.replace('-','_')):
                 setattr(self, tag.replace('-','_'), '')
+        # if given-name and family-name don't exist we will
+        # be clever and use fluiddb/users/name instead
+        if not (self.given_name or self.family_name):
+            name = fluid.get('/about/%s/fluiddb/users/name' % self.about)
+            name = name.content.split()
+            # in case the user did not specify a full name we will
+            # treat the specified name as their first name
+            self.given_name = name.pop(0)
+            self.family_name = name
+            
 
     def update_from_form(self, form):
         """Updates the Person Object from the given form"""
