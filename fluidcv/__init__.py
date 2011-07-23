@@ -61,7 +61,7 @@ def cv(user):
 
     resp = fluid.result(person_rpc)
     logging.info('Person filter for %s returned %d' % (user, resp.status_code))
-    if resp.status_code == 200:
+    if resp.status_code == 200 and resp.content['results']['id']:
         [(uid, tags)] = resp.content['results']['id'].items()
         person = Person(uid, user, tags)
     else:
@@ -69,16 +69,16 @@ def cv(user):
 
     resp = fluid.result(work_rpc)
     logging.info('Work filter for %s returned %d' % (user, resp.status_code))
-    if resp.status_code == 200:
-        jobs = resp.content['results']['id']
-        jobs = [Work(uid, user, tags) for (uid, tags) in jobs.items()]
+    if resp.status_code == 200 and resp.content['results']['id']:
+        resp = resp.content['results']['id']
+        jobs = Work.from_response(user, resp)
     else:
         #FIXME need better error handling
         jobs = []
 
     resp = fluid.result(school_rpc)
     logging.info('School filter for %s returned %d' % (user, resp.status_code))
-    if resp.status_code == 200:
+    if resp.status_code == 200 and resp.content['results']['id']:
         schools = resp.content['results']['id']
         schools = [Education(uid, user, tags)
                     for (uid, tags) in schools.items()]
@@ -87,7 +87,7 @@ def cv(user):
 
     resp = fluid.result(oskill_rpc)
     logging.info('Skill filter for %s returned %d' % (user, resp.status_code))
-    if resp.status_code == 200:
+    if resp.status_code == 200 and resp.content['results']['id']:
         oskills = resp.content['results']['id']
         oskills = [OReillySkill(uid, tags) for (uid, tags) in oskills.items()]
     else:

@@ -20,13 +20,20 @@ class FluidObject(object):
     def __init__(self, uid, user, tags):
         self.uid = uid
         self.user = user
-        #self.about = fluid.get('/objects/%s/fluiddb/about' % self.uid).content
         for key, val in tags.iteritems():
             # strip off namespaces from tags
             key = os.path.basename(key).replace('-', '_')
             setattr(self, key, val['value'])
+        # initialize any tags that haven't been set in fluidinfo
+        # this will probably go away soon...    
+        for tag in type(self).TAGS:
+            if not hasattr(self, tag.replace('-','_')):
+                setattr(self, tag.replace('-','_'), '')
 
-        #self.reload_tags()
+
+    def __eq__(self, other):
+        # this is really only overridden to help with testing
+        return self.__dict__ == other.__dict__
 
     @classmethod
     def filter(cls, query, user, async=False):
@@ -35,6 +42,17 @@ class FluidObject(object):
         tags.append('fluiddb/about')
         rpc = fluid.get('/values', query=query, tags=tags, async=async)
         return rpc
+
+
+    @classmethod
+    def from_response(cls, user, response):
+        objects = []
+        for (uuid, tags) in response.items():
+            obj = cls(uuid, user, tags)
+            if obj.valid:
+                objects.append(obj)
+        return objects
+    
 
     def reload_tags(self):
         tags = ['%s/%s' % (self.user, tag) for tag in self.TAGS.keys()]
@@ -137,9 +155,6 @@ class Person(FluidObject):
         except KeyError:
             pass
         super(Person, self).__init__(uid, user, tags)
-        for tag in Person.TAGS:
-            if not hasattr(self, tag.replace('-','_')):
-                setattr(self, tag.replace('-','_'), '')
         # if given-name and family-name don't exist we will
         # be clever and use fluiddb/users/name instead
         if not (self.given_name or self.family_name):
@@ -148,7 +163,7 @@ class Person(FluidObject):
             # in case the user did not specify a full name we will
             # treat the specified name as their first name
             self.given_name = name.pop(0)
-            self.family_name = name
+            self.family_name = ' '.join(name)
             
 
     def update_from_form(self, form):
@@ -182,7 +197,8 @@ class Publication(FluidObject):
 
 
 class Education(FluidObject):
-    TAGS = {'school-name'       : 'The name of the school',
+    TAGS = {'attended'          : 'Empty tag signifying that you attended this school',
+            'school-name'       : 'The name of the school',
             'school-location'   : 'The location of the school',
             'major'             : 'Your major',
             'degree'            : 'Your degree',
@@ -190,18 +206,18 @@ class Education(FluidObject):
             'end-date'          : 'The date you graduated',
             'gpa'               : 'Your GPA (optional)'}
 
-    def __init__(self, uid, user, tags):
-        super(Education, self).__init__(uid, user, tags)
-        for tag in Education.TAGS:
-            if not hasattr(self, tag.replace('-','_')):
-                setattr(self, tag.replace('-','_'), '')
-
     @classmethod
     def create(cls, about, user):
         """Creates a new Education Object in Fluidinfo"""
         resp = create_object(about)
         logging.info("POST to /objects returned %s status" % resp.status)
         return Education(resp.content['id'], user)
+
+    @property
+    def valid(self):
+        """Determines whether an Education object is in a valid state."""
+        return self.school_name and self.major and self.degree and not (
+            self.end_date and not self.start_date)
 
     def update_from_form(self, form, password):
         """Updates an Education Object from the given form"""
@@ -220,18 +236,23 @@ class Education(FluidObject):
 
 
 class Work(FluidObject):
-    TAGS = {'company'   : 'The name of the company',
+    TAGS = {'employer'  : 'Empty tag signifying that you worked for this company',
+            'company'   : 'The name of the company',
             'title'     : 'Your job title',
             'start-date': 'The date you started',
             'end-date'  : 'The date you left',
             'functions' : 'Your job description'}
 
-    def __init__(self, uid, user, tags):
-        super(Work, self).__init__(uid, user, tags)
-        for tag in Work.TAGS:
-            if not hasattr(self, tag.replace('-','_')):
-                setattr(self, tag.replace('-','_'), '')
-
+    @property
+    def valid(self):
+        """Determines if the Work object is in a valid state."""
+        # the invalid states are when we have no title, or an
+        # end-date with no start-date
+        if not self.title or (self.end_date and not self.start_date):
+            return False
+        else:
+            return True
+        
     @classmethod
     def create(cls, about, user):
         """Creates a new Work Object in Fluidinfo"""
@@ -261,10 +282,8 @@ class OReillySkill(FluidObject):
             'homepage'    : ''}
 
     def __init__(self, uid, tags):
-        super(OReillySkill, self).__init__(uid, 'oreilly.com', tags)
-        for tag in OReillySkill.TAGS:
-            if not hasattr(self, tag.replace('-','_')):
-                setattr(self, tag.replace('-','_'), '')
+        super(OReillySkill, self).__init__(uid, 'oreilly.com', OReillySkill,
+                                           tags)
 
     @classmethod
     def update_from_form(cls, form, user, password):
