@@ -282,9 +282,24 @@ class OReillySkill(FluidObject):
             'homepage'    : ''}
 
     def __init__(self, uid, tags):
-        super(OReillySkill, self).__init__(uid, 'oreilly.com', OReillySkill,
-                                           tags)
+        super(OReillySkill, self).__init__(uid, 'oreilly.com', tags)
 
+    # FIXME: this is a copy/paste from FluidObject because
+    # of clashing function arity in __init__    
+    @classmethod
+    def from_response(cls, response):
+        objects = []
+        for (uuid, tags) in response.items():
+            obj = cls(uuid, tags)
+            if obj.valid:
+                objects.append(obj)
+        return objects
+
+    @property
+    def valid(self):
+        return self.title and self.cover_small and self.homepage
+
+    
     @classmethod
     def update_from_form(cls, form, user, password):
         uids = form.skills.data.split(',')

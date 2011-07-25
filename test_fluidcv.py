@@ -359,9 +359,51 @@ class FluidCVTestCase(unittest.TestCase):
         uuid2 = uuid4()
         work2 = Education(uuid2, 'test', tags2)
         self.assertEqual([work1],
-                         Education.from_response('test',{uuid1: tags1,
-                                                         uuid2: tags2}))
+                         Education.from_response('test', {uuid1: tags1,
+                                                          uuid2: tags2}))
 
+
+    ######################################
+    # OReillySkill Tests
+    ######################################
+    def testOReillySkillValidations(self):
+        # title is required
+        tags = {'oreilly.com/cover-small':
+                    {'value': 'http://cdn.oreilly.com/img/pic.jpg'},
+                'oreilly.com/homepage':
+                    {'value': 'http://oreilly.com/some/book.html'}}
+        oskill = OReillySkill(uuid4(), tags)
+        self.assertFalse(oskill.valid)
+
+        # cover-small is required
+        tags = {'oreilly.com/title': {'value': 'Python Programming'},
+                'oreilly.com/homepage':
+                    {'value': 'http://oreilly.com/some/book.html'}}
+        oskill = OReillySkill(uuid4(), tags)
+        self.assertFalse(oskill.valid)
+
+        # homepage is required
+        tags = {'oreilly.com/title': {'value': 'Python Programming'},
+                'oreilly.com/cover-small':
+                    {'value': 'http://cdn.oreilly.com/img/pic.jpg'}}
+        oskill = OReillySkill(uuid4(), tags)
+        self.assertFalse(oskill.valid)
+
+        
+    def testOReillySkillFromResponse(self):
+        tags1 = {'oreilly.com/title': {'value': 'Python Programming'},
+                 'oreilly.com/cover-small':
+                     {'value': 'http://cdn.oreilly.com/img/pic.jpg'},
+                 'oreilly.com/homepage':
+                     {'value': 'http://oreilly.com/some/book.html'}}
+        uuid1 = uuid4()
+        oskill1 = OReillySkill(uuid1, tags1)
+        tags2 = {'oreilly.com/title': {'value': 'Ruby Programming'}}
+        uuid2 = uuid4()
+        oskill2 = OReillySkill(uuid2, tags2)
+        self.assertEqual([oskill1],
+                         OReillySkill.from_response({uuid1: tags1,
+                                                     uuid2: tags2}))
         
 if __name__ == '__main__':
     unittest.main()
