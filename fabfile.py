@@ -8,7 +8,6 @@ def commit():
 
 def deploy():
     test()
-    commit()
     local("$HOME/Source/google_appengine/appcfg.py update .")
 
 def server():

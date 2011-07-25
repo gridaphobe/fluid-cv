@@ -248,10 +248,7 @@ class Work(FluidObject):
         """Determines if the Work object is in a valid state."""
         # the invalid states are when we have no title, or an
         # end-date with no start-date
-        if not self.title or (self.end_date and not self.start_date):
-            return False
-        else:
-            return True
+        return self.title and not (self.end_date and not self.start_date)
         
     @classmethod
     def create(cls, about, user):
