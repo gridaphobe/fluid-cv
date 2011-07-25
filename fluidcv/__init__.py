@@ -79,17 +79,16 @@ def cv(user):
     resp = fluid.result(school_rpc)
     logging.info('School filter for %s returned %d' % (user, resp.status_code))
     if resp.status_code == 200 and resp.content['results']['id']:
-        schools = resp.content['results']['id']
-        schools = [Education(uid, user, tags)
-                    for (uid, tags) in schools.items()]
+        resp = resp.content['results']['id']
+        schools = Education.from_response(user, resp)
     else:
         schools = []
 
     resp = fluid.result(oskill_rpc)
     logging.info('Skill filter for %s returned %d' % (user, resp.status_code))
     if resp.status_code == 200 and resp.content['results']['id']:
-        oskills = resp.content['results']['id']
-        oskills = [OReillySkill(uid, tags) for (uid, tags) in oskills.items()]
+        resp = resp.content['results']['id']
+        oskills = OReillySkill.from_response(resp)
     else:
         oskills = []
 
